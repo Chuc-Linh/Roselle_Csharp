@@ -1,0 +1,45 @@
+name: Flower Shop C# CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout mã nguồn từ repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Cài đặt .NET SDK (chọn phiên bản tương ứng với dự án, ví dụ .NET 8.0)
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # 3. Khôi phục các NuGet packages
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # 4. Build dự án ở chế độ Release
+    - name: Build project
+      run: dotnet build --no-restore --configuration Release
+
+    # 5. Chạy unit tests (nếu dự án có project test)
+    - name: Run tests
+      run: dotnet test --no-build --configuration Release --verbosity normal
+
+    # 6. Publish ứng dụng để chuẩn bị deploy
+    - name: Publish application
+      run: dotnet publish -c Release -o ./publish-output
+
+    # 7. Lưu trữ artifact (gói sau khi publish) để dùng cho bước deploy hoặc tải về kiểm tra
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: website-artifacts
+        path: ./publish-output/
