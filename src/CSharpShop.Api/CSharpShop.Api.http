@@ -1,0 +1,6 @@
+@CSharpShop.Api_HostAddress = http://localhost:5142
+
+GET {{CSharpShop.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

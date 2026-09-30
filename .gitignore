@@ -1,0 +1,26 @@
+# .NET / Visual Studio
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+# VS Code personal settings
+.vscode/
+# Published output and test results
+artifacts/
+TestResults/
+*.trx
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+*.pfx
+*.p12
+*.key
+# OS files
+Thumbs.db
+.DS_Store
