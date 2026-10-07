@@ -1,0 +1,106 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var currentId = ViewContext.RouteData.Values["id"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Roselle Flowers</title>
+    <link rel="icon" type="image/png" href="~/images/favicon.png">
+
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/cam-tu-cau.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/hoa-baby.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/hoa-hong.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/tulip.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/hoa-huongduong.css" asp-append-version="true">
+
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <h1><a asp-controller="Home" asp-action="Index">roselle</a></h1>
+        </div>
+
+        <nav class="header-center">
+            <ul>
+                <li>
+                    <a asp-controller="Home" asp-action="Index"
+                       class="@(currentController == "Home" && currentAction == "Index" ? "active" : "")">
+                        Trang chủ
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Category" asp-route-id="cam-tu"
+                       class="@(currentId == "cam-tu" ? "active" : "")">
+                        Hoa Cẩm Tú
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Category" asp-route-id="tulip"
+                       class="@(currentId == "tulip" ? "active" : "")">
+                        Hoa Tulip
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Category" asp-route-id="hong"
+                       class="@(currentId == "hong" ? "active" : "")">
+                        Hoa hồng
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Category" asp-route-id="huong-duong"
+                       class="@(currentId == "huong-duong" ? "active" : "")">
+                        Hoa hướng dương
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Product" asp-action="Category" asp-route-id="baby"
+                       class="@(currentId == "baby" ? "active" : "")">
+                        Hoa Baby
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="header-right" id="user-area">
+            @await Html.PartialAsync("_LoginPartial")
+        </div>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer" role="contentinfo" aria-label="Chân trang">
+        <div class="container footer-grid">
+            <div class="brand">
+                <h4>roselle</h4>
+                <p>Roselle Flowers — hoa tươi cho mọi khoảnh khắc.</p>
+                <p class="address">123 Đường Hoa, Quận A, TP. HCM</p>
+            </div>
+            <div class="contact">
+                <p><strong>Hotline:</strong> <a href="tel:0123456789">0123 456 789</a></p>
+                <p><strong>Email:</strong> <a href="mailto:info@roselle.example">info@roselle.example</a></p>
+                <div class="social">
+                    <a href="#" aria-label="Facebook">FB</a>
+                    <a href="#" aria-label="Instagram">IG</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <small>© <span id="site-year"></span> Roselle Flowers. All rights reserved.</small>
+        </div>
+    </footer>
+    <script>
+        document.getElementById('site-year').textContent = new Date().getFullYear();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

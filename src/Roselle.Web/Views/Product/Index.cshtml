@@ -1,0 +1,38 @@
+@model List<Roselle.Web.Models.Product>
+@{
+    ViewData["Title"] = ViewData["CategoryTitle"] ?? "Danh mục sản phẩm";
+    var categoryTitle = ViewData["CategoryTitle"] as string ?? "Danh mục";
+    var categoryDescription = ViewData["CategoryDescription"] as string ?? "";
+}
+
+<section class="category-page container">
+    <h1 class="page-title">@categoryTitle</h1>
+
+    @if (!string.IsNullOrEmpty(categoryDescription))
+    {
+        <p class="category-description">@categoryDescription</p>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="cart-empty">
+            <p>Chưa có sản phẩm trong danh mục này.</p>
+        </div>
+    }
+    else
+    {
+        <div class="hot-grid">
+            @foreach (var product in Model)
+            {
+                <article class="product-card">
+                    <a class="product-link" href="/Product/Detail/@product.ProductID">
+                        <div class="product-thumb" style="background-image:url('@product.ImageUrl')"></div>
+                        <h4 class="product-title">@product.ProductName</h4>
+                        <div class="product-meta">@product.Description</div>
+                        <div class="product-price">@product.Price.ToString("N0") ₫</div>
+                    </a>
+                </article>
+            }
+        </div>
+    }
+</section>
