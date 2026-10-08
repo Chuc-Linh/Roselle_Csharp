@@ -1,0 +1,64 @@
+.history-container{
+max-width:900px;
+margin:40px auto;
+font-family:Quicksand;
+}
+
+.order-card{
+background:white;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.order-date{
+font-size:14px;
+color:#777;
+margin-bottom:10px;
+}
+
+.order-item{
+display:flex;
+align-items:center;
+gap:15px;
+padding:8px 0;
+border-bottom:1px solid #eee;
+}
+
+.order-item img{
+width:60px;
+height:60px;
+border-radius:8px;
+object-fit:cover;
+}
+
+.order-name{
+flex:1;
+font-weight:600;
+}
+
+.order-price{
+color:#e53935;
+font-weight:600;
+}
+
+.order-footer{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+align-items:center;
+}
+
+.buy-again{
+padding:8px 14px;
+border:none;
+background:#ff6b81;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.buy-again:hover{
+background:#ff4d6d;
+}

@@ -1,0 +1,38 @@
+@{
+    var userName = Context.Session.GetString("UserName");
+    var role = Context.Session.GetString("UserRole");
+}
+
+<a href="/Cart" class="cart-icon" aria-label="Giỏ hàng">
+    🛒 <span id="cart-count" class="cart-badge">0</span>
+</a>
+
+@if (string.IsNullOrEmpty(userName))
+{
+    <a href="/Account/Register" class="btn">Đăng ký</a>
+    <a href="/Account/Login" class="btn">Đăng nhập</a>
+}
+else
+{
+    <div class="user-dropdown">
+        <span class="user-name">Xin chào, <strong>@userName</strong></span>
+        <div class="dropdown-menu">
+            <a href="/Account/Profile">Thông tin cá nhân</a>
+            <a href="/Order/History">Đơn hàng của tôi</a>
+            @if (role == "Admin")
+            {
+                <a href="/admin" target="_blank">Trang quản trị</a>
+            }
+            <a href="/Account/Logout">Đăng xuất</a>
+        </div>
+    </div>
+}
+
+<script>
+    fetch('/Cart/Count')
+        .then(r => r.json())
+        .then(data => {
+            var badge = document.getElementById('cart-count');
+            if (badge) badge.textContent = data.count;
+        });
+</script>
