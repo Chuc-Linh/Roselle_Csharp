@@ -3,29 +3,41 @@
     ViewData["Title"] = Model?.ProductName ?? "Chi tiết sản phẩm";
 }
 
-<section class="detail-page container">
-    <div class="detail-grid">
-        <div class="detail-image">
-           <img src="@Model?.ImageUrl" alt="@Model?.ProductName">
+@if (Model is null)
+{
+    <section class="detail-page container">
+        <div class="cart-empty">
+            <p>Không tìm thấy sản phẩm.</p>
+            <a href="/" class="btn btn-primary">Về trang chủ</a>
         </div>
-        <div class="detail-info">
-            <h1>@Model.ProductName</h1>
-            <div class="detail-price">@Model.Price.ToString("N0") ₫</div>
-            <p class="detail-desc">@Model.Description</p>
-
-            <div class="detail-qty">
-                <label for="productQty">Số lượng:</label>
-                <input type="number" id="productQty" value="1" min="1" max="99">
+    </section>
+}
+else
+{
+    <section class="detail-page container">
+        <div class="detail-grid">
+            <div class="detail-image">
+                <img src="@Model.ImageUrl" alt="@Model.ProductName">
             </div>
+            <div class="detail-info">
+                <h1>@Model.ProductName</h1>
+                <div class="detail-price">@Model.Price.ToString("N0") ₫</div>
+                <p class="detail-desc">@Model.Description</p>
 
-            <div class="detail-actions">
-                <button class="btn btn-outline btn-add-cart" data-product-id="@Model.ProductID">Thêm vào giỏ</button>
-                <button class="btn btn-primary">Mua ngay</button>
+                <div class="detail-qty">
+                    <label for="productQty">Số lượng:</label>
+                    <input type="number" id="productQty" value="1" min="1" max="99">
+                </div>
+
+                <div class="detail-actions">
+                    <button class="btn btn-outline btn-add-cart" data-product-id="@Model.ProductID">Thêm vào giỏ</button>
+                    <button class="btn btn-primary">Mua ngay</button>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-@section Scripts {
-    <script src="~/js/cart.js" asp-append-version="true"></script>
+    @section Scripts {
+        <script src="~/js/cart.js" asp-append-version="true"></script>
+    }
 }
