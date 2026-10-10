@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await res.json();
             if (data.success) {
                 updateBadge(data.cartCount);
-                showToast('Đã thêm vào giỏ hàng 🌸');
+                showToast('Đã thêm vào giỏ hàng thành công', 'success');
             }
         });
     });
@@ -79,7 +79,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // Xóa sản phẩm
     document.querySelectorAll('.btn-remove').forEach(btn => {
         btn.addEventListener('click', async function () {
-            if (!confirm('Xóa sản phẩm này khỏi giỏ?')) return;
+            showConfirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ?', async () => {
+                const res = await fetch('/Cart/Remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `cartItemId=${id}`
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    row.remove();
+                    document.getElementById('cartTotal').textContent =
+                        data.totalAmount.toLocaleString('vi-VN') + ' ₫';
+                    updateBadge(data.totalQuantity);
+                    showToast('Đã xóa sản phẩm', 'success');
+                    if (data.totalQuantity === 0) location.reload();
+                }
+            });
+            return;
             const row = this.closest('tr');
             const id = row.dataset.id;
 
