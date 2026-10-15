@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - shop-sqlserver:/var/opt/mssql
+      - ./ShopApi/schema.sql:/init/schema.sql:ro
+      - ./ShopApi/migrations:/init/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+  api:
+    build:
+      context: ./ShopApi
+      dockerfile: Containerfile
+    environment:
+      ConnectionStrings__ShopDb: "Server=db,1433;Database=QuanLyBanHoa;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;Encrypt=True"
+    ports:
+      - "5081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  shop-sqlserver:

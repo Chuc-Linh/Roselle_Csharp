@@ -1,0 +1,78 @@
+@baseUrl = http://localhost:5080
+
+### Check API
+GET {{baseUrl}}/health
+
+### Search products
+GET {{baseUrl}}/api/products?page=1&pageSize=20&q=hoa
+
+### Login to the admin page with a seeded admin account
+POST {{baseUrl}}/api/auth/admin/login
+Content-Type: application/json
+
+{
+  "username": "admin1",
+  "password": "HoaDemo@2026"
+}
+
+### Public customer registration (no login required)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "khachmoi01",
+  "password": "MatKhauMoi123",
+  "fullName": "Nguyễn Văn An",
+  "phone": "0901234567",
+  "email": "an@example.com",
+  "gender": "Nam",
+  "dateOfBirth": "2000-01-01",
+  "address": "Quận 1, TP. Hồ Chí Minh"
+}
+
+### Customer page login (replace with a registered customer account)
+POST {{baseUrl}}/api/auth/customer/login
+Content-Type: application/json
+
+{
+  "username": "customer1",
+  "password": "YourPassword123"
+}
+
+### Create product (after admin login)
+POST {{baseUrl}}/api/admin/products
+Content-Type: application/json
+
+{
+  "code": "HH00039",
+  "name": "Bó hoa mẫu",
+  "typeId": 1,
+  "description": "Mô tả sản phẩm",
+  "color": "Hồng",
+  "unit": "Bó",
+  "costPrice": 100000,
+  "profitRate": 25,
+  "quantity": 0,
+  "minStockLevel": 5,
+  "image": null,
+  "supplierName": "Nhà cung cấp",
+  "status": true
+}
+
+### Add to cart
+POST {{baseUrl}}/api/cart/items
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 1
+}
+
+### Checkout from cart
+POST {{baseUrl}}/api/orders
+Content-Type: application/json
+
+{
+  "paymentMethod": "Tiền mặt",
+  "deliveryAddress": "Địa chỉ giao hàng"
+}
