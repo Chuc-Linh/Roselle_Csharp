@@ -22,6 +22,10 @@ dotnet restore CSharpShop.sln
 dotnet build CSharpShop.sln
 dotnet run --project src/CSharpShop.Api/CSharpShop.Api.csproj
 ```
+Chạy giao diện
+```powershell
+ dotnet run --project src/Roselle.Web/Roselle.Web.csproj
+```
 
 Giữ terminal API chạy và kiểm tra Postman: `GET http://localhost:5142/api/categories`.
 
