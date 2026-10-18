@@ -165,7 +165,7 @@ static async Task<IResult> LoginForRole(Login r, string? requiredRole, HttpConte
     await using var cn = await db.OpenAsync();
     var u = await One(cn, "SELECT a.AccountID,a.Username,a.PasswordHash,a.Role,a.Status,c.CustomerID,c.FullName FROM ACCOUNT a LEFT JOIN CUSTOMER c ON c.AccountID=a.AccountID WHERE a.Username=@u", null, ("@u", r.Username.Trim()));
     if (u is null || !Verify(r.Password, Convert.ToString(u["PasswordHash"])!)) return Results.Unauthorized();
-    if (requiredRole is not null && !string.Equals(Convert.ToString(u["Role"]), requiredRole, StringComparison.Ordinal)) return Results.Forbid();
+    if (requiredRole is not null && !string.Equals(Convert.ToString(u["Role"]), requiredRole, StringComparison.Ordinal)) return Forbidden();
     if (!Convert.ToBoolean(u["Status"])) return Results.Problem("Tài khoản đã bị khóa.", statusCode: 403);
 
     ctx.Session.Clear();
@@ -179,7 +179,8 @@ static async Task<IResult> LoginForRole(Login r, string? requiredRole, HttpConte
 static int CustomerId(HttpContext c) => c.Session.GetInt32("customerId") ?? 0;
 static bool IsAdmin(HttpContext c) => AccountId(c) > 0 && c.Session.GetString("role") == "QuanTriVien";
 static bool IsCustomer(HttpContext c) => CustomerId(c) > 0 && c.Session.GetString("role") == "KhachHang";
-static IResult AuthFail(HttpContext c) => AccountId(c) == 0 ? Results.Unauthorized() : Results.Forbid();
+static IResult AuthFail(HttpContext c) => AccountId(c) == 0 ? Results.Unauthorized() : Forbidden();
+static IResult Forbidden() => Results.Problem("Tài khoản không có quyền truy cập chức năng này.", statusCode: 403);
 static IResult Bad(string key, string message) => Results.ValidationProblem(new Dictionary<string, string[]> { [key] = [message] });
 static object? EmptyToNull(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 static string Hash(string password) { var salt = RandomNumberGenerator.GetBytes(16); return "pbkdf2-sha256$600000$" + Convert.ToBase64String(salt) + "$" + Convert.ToBase64String(Rfc2898DeriveBytes.Pbkdf2(password, salt, 600000, HashAlgorithmName.SHA256, 32)); }
