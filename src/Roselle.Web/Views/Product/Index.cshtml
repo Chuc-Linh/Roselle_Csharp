@@ -26,10 +26,12 @@
             {
                 <article class="product-card">
                     <a class="product-link" href="/Product/Detail/@product.ProductID">
-                        <div class="product-thumb" style="background-image:url('@product.ImageUrl')"></div>
+                        <div class="product-thumb">
+                            <img src="/@product.Image" alt="@product.ProductName" style="width:100%; height:100%; object-fit:cover; border-radius: 12px;" />
+                        </div>
                         <h4 class="product-title">@product.ProductName</h4>
                         <div class="product-meta">@product.Description</div>
-                        <div class="product-price">@product.Price.ToString("N0") ₫</div>
+                        <div class="product-price">@product.SellingPrice.GetValueOrDefault().ToString("N0") ₫</div>
                     </a>
                 </article>
             }

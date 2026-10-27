@@ -20,6 +20,65 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
 
+    <style>
+        /* === FIX MÀU CHỮ TRONG DARK MODE === */
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6,
+        [data-theme="dark"] p,
+        [data-theme="dark"] div,
+        [data-theme="dark"] span,
+        [data-theme="dark"] label,
+        [data-theme="dark"] a {
+            color: #e0e0e0 !important;
+        }
+
+        /* Sửa riêng các ô input, select, textarea */
+        [data-theme="dark"] input,
+        [data-theme="dark"] select,
+        [data-theme="dark"] textarea {
+            background-color: #2a2a2a !important;
+            color: #ffffff !important;
+            border-color: #555 !important;
+        }
+
+        /* Sửa riêng ô tìm kiếm trên Header để không bị đen xì */
+        [data-theme="dark"] .header-search-group input {
+            background-color: transparent !important; /* Xóa nền đen */
+            color: #e0e0e0 !important; /* Chữ màu trắng xám */
+        }
+        
+        /* Đổi màu khung bao quanh tìm kiếm thành màu xám tối */
+        [data-theme="dark"] .header-search-group {
+            background-color: #2a2a2a !important;
+            border-color: #444 !important;
+        }
+        [data-theme="dark"] .header-search-group button {
+            color: #e0e0e0 !important;
+        }
+
+        /* Sửa nền trắng của các khối (card, form, bảng) */
+        [data-theme="dark"] .auth-container,
+        [data-theme="dark"] .profile-info,
+        [data-theme="dark"] .cart-table,
+        [data-theme="dark"] .product-card,
+        [data-theme="dark"] .checkout-page > div > div,
+        [data-theme="dark"] #searchDropdown { /* Thêm dropdown tìm kiếm */
+            background-color: #1e1e1e !important;
+            color: #e0e0e0 !important;
+            border-color: #333 !important;
+        }
+
+        /* Sửa đường kẻ bảng */
+        [data-theme="dark"] .cart-table th,
+        [data-theme="dark"] .cart-table td {
+            border-color: #333 !important;
+        }
+    </style>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -76,6 +135,32 @@
             </ul>
         </nav>
 
+        <!-- Thanh tìm kiếm nâng cao -->
+        <div class="header-search-wrapper" style="position: relative;">
+            <form asp-controller="Product" asp-action="Search" method="get" class="header-search-form" id="searchForm">
+                <div class="header-search-group">
+                    <input type="text" id="searchInput" name="q" placeholder="Tìm hoa..." value="@Context.Request.Query["q"]" aria-label="Search" autocomplete="off">
+                    <button type="submit" aria-label="Tìm kiếm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Dropdown gợi ý và lịch sử (Đã bỏ background: #fff; để CSS xử lý) -->
+            <div id="searchDropdown" class="search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; max-height: 300px; overflow-y: auto; min-width: 250px;">
+                <div id="searchSuggestions"></div>
+                <div id="searchHistorySection" style="border-top: 1px solid #eee; padding: 10px; display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <small style="color: #888;">Lịch sử tìm kiếm</small>
+                        <a href="#" id="clearHistory" style="font-size: 12px; color: #9d4edd; text-decoration: none;">Xóa</a>
+                    </div>
+                    <ul id="searchHistoryList" style="list-style: none; padding: 0; margin: 0;"></ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Nút toggle dark mode -->
         <button class="theme-toggle" id="themeToggle" aria-label="Chuyển chế độ sáng/tối">
             <span class="theme-icon">🌙</span>
@@ -116,7 +201,7 @@
         document.getElementById('site-year').textContent = new Date().getFullYear();
     </script>
 
-    <!-- JS: Hamburger + Dark Mode -->
+    <!-- JS: Hamburger + Dark Mode + Search Suggest -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // === 1. Hamburger menu ===
@@ -164,6 +249,127 @@
                             next === 'dark' ? 'Đã bật chế độ tối ' : 'Đã bật chế độ sáng ',
                             'success'
                         );
+                    }
+                });
+            }
+
+            // === 3. Xử lý Tìm kiếm nâng cao ===
+            const searchInput = document.getElementById('searchInput');
+            const searchDropdown = document.getElementById('searchDropdown');
+            const suggestionsContainer = document.getElementById('searchSuggestions');
+            const historyList = document.getElementById('searchHistoryList');
+            const historySection = document.getElementById('searchHistorySection');
+            const clearHistoryBtn = document.getElementById('clearHistory');
+            const searchForm = document.getElementById('searchForm');
+
+            if (searchInput && searchDropdown) {
+                // Lịch sử tìm kiếm
+                function getHistory() {
+                    return JSON.parse(localStorage.getItem('searchHistory')) || [];
+                }
+
+                function saveHistory(keyword) {
+                    if (!keyword.trim()) return;
+                    let history = getHistory();
+                    history = history.filter(item => item.toLowerCase() !== keyword.toLowerCase());
+                    history.unshift(keyword);
+                    history = history.slice(0, 5);
+                    localStorage.setItem('searchHistory', JSON.stringify(history));
+                }
+
+                function renderHistory() {
+                    const history = getHistory();
+                    if (history.length === 0) {
+                        historySection.style.display = 'none';
+                        return;
+                    }
+                    historySection.style.display = 'block';
+                    historyList.innerHTML = history.map(item => `
+                        <li style="padding: 8px 10px; cursor: pointer; border-radius: 4px; transition: background 0.2s;" 
+                            onmouseover="this.style.background='#f5f5f5'" 
+                            onmouseout="this.style.background='transparent'" 
+                            onclick="document.getElementById('searchInput').value='${item}'; document.getElementById('searchForm').submit();">
+                            🕒 ${item}
+                        </li>
+                    `).join('');
+                }
+
+                if (clearHistoryBtn) {
+                    clearHistoryBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        localStorage.removeItem('searchHistory');
+                        renderHistory();
+                    });
+                }
+
+                // Auto-complete
+                let debounceTimer;
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.trim();
+                    
+                    if (query.length === 0) {
+                        suggestionsContainer.innerHTML = '';
+                        renderHistory();
+                        searchDropdown.style.display = 'block';
+                        return;
+                    }
+
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(async () => {
+                        try {
+                            const res = await fetch(`/Product/SearchSuggest?term=${encodeURIComponent(query)}`);
+                            const data = await res.json();
+                            
+                            suggestionsContainer.innerHTML = '';
+                            historySection.style.display = 'none';
+
+                            if (data.length > 0) {
+                                data.forEach(item => {
+                                    const div = document.createElement('div');
+                                    div.style.padding = '10px';
+                                    div.style.cursor = 'pointer';
+                                    div.style.borderBottom = '1px solid #eee';
+                                    div.innerHTML = `🔍 ${item}`;
+                                    div.onmouseover = () => div.style.background = '#f5f5f5';
+                                    div.onmouseout = () => div.style.background = 'transparent';
+                                    div.onclick = () => {
+                                        searchInput.value = item;
+                                        searchForm.submit();
+                                    };
+                                    suggestionsContainer.appendChild(div);
+                                });
+                            }
+                            searchDropdown.style.display = 'block';
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }, 300);
+                });
+
+                // Ẩn dropdown khi click ra ngoài
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+                        searchDropdown.style.display = 'none';
+                    }
+                });
+
+                // Lưu lịch sử khi submit form
+                searchForm.addEventListener('submit', function(e) {
+                    const query = searchInput.value.trim();
+                    if (query === '') {
+                        e.preventDefault();
+                        searchInput.focus();
+                        searchDropdown.style.display = 'none';
+                        return;
+                    }
+                    saveHistory(query);
+                });
+                
+                // Hiển thị lịch sử khi click vào ô input
+                searchInput.addEventListener('focus', function() {
+                    if (this.value.trim() === '') {
+                        renderHistory();
+                        searchDropdown.style.display = 'block';
                     }
                 });
             }

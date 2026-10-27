@@ -1925,3 +1925,130 @@ header {
   [data-theme="dark"] .loading-content p {
     color: var(--accent);
   }
+  /* === Thanh tìm kiếm trên Header === */
+.header-search-form {
+  margin: 0 15px;
+  display: flex;
+  align-items: center;
+}
+
+.header-search-group {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-light, #f4f4f9);
+  border-radius: 20px;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  height: 38px;
+}
+
+.header-search-group:focus-within {
+  background-color: var(--bg-color, #fff);
+  border-color: #9d4edd; /* Màu tím pastel */
+  box-shadow: 0 0 8px rgba(157, 78, 221, 0.2);
+}
+
+.header-search-group input {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 5px;
+  font-size: 14px;
+  width: 150px; /* Có thể tăng lên 200px nếu header còn trống */
+  color: inherit;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.header-search-group input::placeholder {
+  color: #999;
+}
+
+.header-search-group button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9d4edd;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-left: 5px;
+}
+
+.header-search-group button:hover {
+  color: #7b2cbf;
+}
+
+/* Responsive cho Mobile */
+@media (max-width: 992px) {
+  .header-search-form {
+      order: 3; /* Đẩy xuống dưới hoặc ẩn đi trên mobile */
+      width: 100%;
+      margin: 10px 0;
+  }
+  .header-search-group {
+      width: 100%;
+  }
+  .header-search-group input {
+      width: 100%;
+  }
+}
+/* === SỬA LỖI FOOTER BỊ NHẢY LÊN GIỮA MÀN HÌNH === */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1 0 auto; /* Đẩy footer xuống đáy */
+}
+
+.site-footer {
+  flex-shrink: 0; /* Đảm bảo footer không bị co lại */
+}
+/* === FIX MÀU CHỮ TRONG DARK MODE === */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] div,
+[data-theme="dark"] span,
+[data-theme="dark"] label,
+[data-theme="dark"] a {
+    color: #e0e0e0 !important;
+}
+
+/* Sửa riêng các ô input, select, textarea */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+    border-color: #555 !important;
+}
+
+/* Sửa nền trắng của các khối (card, form, bảng) */
+[data-theme="dark"] .auth-container,
+[data-theme="dark"] .profile-info,
+[data-theme="dark"] .cart-table,
+[data-theme="dark"] .product-card,
+[data-theme="dark"] .checkout-page > div > div {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
+    border-color: #333 !important;
+}
+
+/* Sửa đường kẻ bảng */
+[data-theme="dark"] .cart-table th,
+[data-theme="dark"] .cart-table td {
+    border-color: #333 !important;
+}

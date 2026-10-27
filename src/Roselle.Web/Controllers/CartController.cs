@@ -1,93 +1,103 @@
 using Microsoft.AspNetCore.Mvc;
 using Roselle.Web.Services;
+using Roselle.Web.Models;
+using Roselle.Web.Models.ViewModels;
+using Roselle.Web.Data;
 
 namespace Roselle.Web.Controllers
 {
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
+        private readonly RoselleDbContext _db; // Dùng để lấy thông tin sản phẩm cho khách vãng lai
 
-        public CartController(ICartService cartService)
+        public CartController(ICartService cartService, RoselleDbContext db)
         {
             _cartService = cartService;
+            _db = db;
         }
 
-        private int? CurrentUserId => HttpContext.Session.GetInt32("UserID");
+        private int? CurrentCustomerId => HttpContext.Session.GetInt32("UserID");
 
-        private string GetOrCreateSessionId()
-        {
-            var sid = HttpContext.Session.GetString("CartSessionId");
-            if (string.IsNullOrEmpty(sid))
-            {
-                sid = Guid.NewGuid().ToString();
-                HttpContext.Session.SetString("CartSessionId", sid);
-            }
-            return sid;
-        }
-
-        // GET: /Cart
+        // Xem giỏ hàng
         public async Task<IActionResult> Index()
         {
-            var vm = await _cartService.GetCartAsync(CurrentUserId, GetOrCreateSessionId());
+            if (CurrentCustomerId == null)
+            {
+                // Khách vãng lai: Lấy từ Session
+                var guestItems = _cartService.GetGuestCart(HttpContext.Session);
+                
+                // Cần lấy thông tin chi tiết (tên, ảnh, giá) của các sản phẩm trong giỏ
+                foreach (var item in guestItems)
+                {
+                    item.Product = await _db.Products.FindAsync(item.ProductID);
+                }
+
+                return View(new CartViewModel { Items = guestItems });
+            }
+
+            // Thành viên: Lấy từ Database
+            var vm = await _cartService.GetCartAsync(CurrentCustomerId.Value);
             return View(vm);
         }
 
-        // POST: /Cart/Add
         [HttpPost]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
-            var count = await _cartService.AddToCartAsync(
-                CurrentUserId, GetOrCreateSessionId(), productId, quantity);
-
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            if (CurrentCustomerId == null)
+            {
+                // Chưa đăng nhập -> Thêm vào Session
+                _cartService.AddToGuestCart(HttpContext.Session, productId, quantity);
+                var count = _cartService.GetGuestCart(HttpContext.Session).Sum(c => c.Quantity);
                 return Json(new { success = true, cartCount = count });
+            }
 
-            return RedirectToAction("Index");
+            // Đã đăng nhập -> Thêm vào DB
+            var countDb = await _cartService.AddToCartAsync(CurrentCustomerId.Value, productId, quantity);
+            return Json(new { success = true, cartCount = countDb });
         }
 
-        // POST: /Cart/Update
         [HttpPost]
-        public async Task<IActionResult> Update(int cartItemId, int quantity)
+        public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
         {
-            await _cartService.UpdateQuantityAsync(cartItemId, quantity);
-            var vm = await _cartService.GetCartAsync(CurrentUserId, GetOrCreateSessionId());
+            if (CurrentCustomerId == null)
+            {
+                _cartService.UpdateGuestCart(HttpContext.Session, productId, quantity);
+                
+                // Tính lại tổng tiền cho Guest để trả về
+                var guestCart = _cartService.GetGuestCart(HttpContext.Session);
+                decimal totalAmount = 0;
+                foreach(var item in guestCart) {
+                    var p = await _db.Products.FindAsync(item.ProductID);
+                    if(p != null) totalAmount += (p.SellingPrice ?? 0) * item.Quantity;
+                }
+                return Json(new { success = true, totalAmount = totalAmount, totalQuantity = guestCart.Sum(c => c.Quantity) });
+            }
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return Json(new
-                {
-                    success = true,
-                    totalAmount = vm.TotalAmount,
-                    totalQuantity = vm.TotalQuantity,
-                    itemSubTotal = vm.Items.FirstOrDefault(i => i.CartItemID == cartItemId)?.SubTotal ?? 0
-                });
-
-            return RedirectToAction("Index");
+            await _cartService.UpdateQuantityAsync(CurrentCustomerId.Value, productId, quantity);
+            var vm = await _cartService.GetCartAsync(CurrentCustomerId.Value);
+            return Json(new { success = true, totalAmount = vm.TotalAmount, totalQuantity = vm.TotalQuantity });
         }
 
-        // POST: /Cart/Remove
         [HttpPost]
-        public async Task<IActionResult> Remove(int cartItemId)
+        public async Task<IActionResult> Remove(int productId)
         {
-            await _cartService.RemoveItemAsync(cartItemId);
-            var vm = await _cartService.GetCartAsync(CurrentUserId, GetOrCreateSessionId());
+            if (CurrentCustomerId == null)
+            {
+                _cartService.RemoveFromGuestCart(HttpContext.Session, productId);
+                
+                var guestCart = _cartService.GetGuestCart(HttpContext.Session);
+                decimal totalAmount = 0;
+                foreach(var item in guestCart) {
+                    var p = await _db.Products.FindAsync(item.ProductID);
+                    if(p != null) totalAmount += (p.SellingPrice ?? 0) * item.Quantity;
+                }
+                return Json(new { success = true, totalAmount = totalAmount, totalQuantity = guestCart.Sum(c => c.Quantity) });
+            }
 
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return Json(new
-                {
-                    success = true,
-                    totalAmount = vm.TotalAmount,
-                    totalQuantity = vm.TotalQuantity
-                });
-
-            return RedirectToAction("Index");
-        }
-
-        // GET: /Cart/Count
-        [HttpGet]
-        public async Task<IActionResult> Count()
-        {
-            var count = await _cartService.GetCartCountAsync(CurrentUserId, GetOrCreateSessionId());
-            return Json(new { count });
+            await _cartService.RemoveItemAsync(CurrentCustomerId.Value, productId);
+            var vm = await _cartService.GetCartAsync(CurrentCustomerId.Value);
+            return Json(new { success = true, totalAmount = vm.TotalAmount, totalQuantity = vm.TotalQuantity });
         }
     }
 }

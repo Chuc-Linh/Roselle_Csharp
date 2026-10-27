@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<section class="auth-page">
+    <div class="auth-container" style="max-width: 600px;">
+        <div class="auth-header">
+            <h1>Thông tin cá nhân</h1>
+            <p>Quản lý thông tin tài khoản của bạn</p>
+        </div>
+
+        <!-- Hiển thị thông báo -->
+        @if (TempData["Error"] != null)
+        {
+            <div class="auth-error" style="background-color: #ffe6e6; color: #dc3545; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ffcccc;">
+                @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="auth-error" style="background-color: #e6ffed; color: #28a745; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb;">
+                @TempData["Success"]
+            </div>
+        }
+
+        <div class="profile-info" style="padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            
+            <div style="display: flex; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <div style="width: 60px; height: 60px; background: #9d4edd; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-right: 15px;">
+                    @(ViewData["FullName"]?.ToString()?.Substring(0, 1).ToUpper() ?? "U")
+                </div>
+                <div>
+                    <!-- Đã xóa color: #333; để Dark Mode tự xử lý -->
+                    <h3 style="margin: 0;">@ViewData["FullName"]</h3>
+                    <span style="color: #888;">Tên đăng nhập: <strong>@ViewData["Username"]</strong></span>
+                </div>
+            </div>
+
+            <form method="post" action="/Account/UpdateProfile" id="profileForm">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Họ và tên *</label>
+                    <input type="text" name="fullName" value="@ViewData["FullName"]" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Email</label>
+                    <input type="email" name="email" value="@ViewData["Email"]" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Số điện thoại</label>
+                    <input type="tel" name="phone" value="@ViewData["Phone"]" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Địa chỉ</label>
+                    <input type="text" name="address" value="@ViewData["Address"]" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; padding: 12px; border-radius: 8px; background: #9d4edd; color: white; border: none; cursor: pointer; font-weight: 600;">Lưu thay đổi</button>
+                    <a href="/Account/Logout" class="btn btn-outline" style="flex: 1; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; border: 1px solid #9d4edd; color: #9d4edd; font-weight: 600;">Đăng xuất</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

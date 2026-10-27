@@ -1,0 +1,89 @@
+@model Roselle.Web.Models.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<section class="checkout-page container" style="margin-top: 40px; margin-bottom: 60px;">
+    <h1 class="page-title" style="text-align: center; color: #7b2cbf; margin-bottom: 30px;">Thanh toán đơn hàng</h1>
+
+    <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <!-- CỘT TRÁI: FORM THÔNG TIN GIAO HÀNG -->
+        <div style="flex: 2; min-width: 300px;">
+            <div style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px;">Thông tin giao hàng</h3>
+                
+                <form method="post" action="/Order/PlaceOrder" id="checkoutForm">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Họ và tên người nhận *</label>
+                        <input type="text" name="fullName" value="@ViewData["FullName"]" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Số điện thoại *</label>
+                        <input type="tel" name="phone" value="@ViewData["Phone"]" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <label style="font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;">Địa chỉ giao hàng *</label>
+                        <input type="text" name="address" value="@ViewData["Address"]" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                    </div>
+
+                    <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px;">Phương thức thanh toán</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
+                        <label style="display: flex; align-items: center; padding: 12px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;">
+                            <input type="radio" name="paymentMethod" value="COD" checked style="margin-right: 10px;">
+                            <span>Thanh toán khi nhận hàng (COD)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; padding: 12px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;">
+                            <input type="radio" name="paymentMethod" value="BANK" style="margin-right: 10px;">
+                            <span>Chuyển khoản ngân hàng</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 15px; font-size: 16px; border-radius: 8px; background: #9d4edd; color: white; border: none; cursor: pointer; font-weight: 600;">Xác nhận Đặt hàng</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG -->
+        <div style="flex: 1; min-width: 300px;">
+            <div style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 18px;">Đơn hàng của bạn</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #eee; padding-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="/@item.Product?.Image" alt="@item.Product?.ProductName" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 600;">@item.Product?.ProductName</div>
+                                    <div style="font-size: 12px; color: #888;">Số lượng: @item.Quantity</div>
+                                </div>
+                            </div>
+                            <div style="font-weight: 600; color: #7b2cbf;">
+                                @(((item.Product?.SellingPrice ?? 0) * item.Quantity).ToString("N0")) ₫
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                    <span>Tạm tính:</span>
+                    <span>@Model.TotalAmount.ToString("N0") ₫</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px;">
+                    <span>Phí giao hàng:</span>
+                    <span>Miễn phí</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid #eee; padding-top: 15px; font-size: 18px; font-weight: bold;">
+                    <span>Tổng cộng:</span>
+                    <span style="color: #7b2cbf;">@Model.TotalAmount.ToString("N0") ₫</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
