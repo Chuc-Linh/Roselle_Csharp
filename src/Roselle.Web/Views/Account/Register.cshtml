@@ -16,10 +16,12 @@
             </div>
         }
 
-        <form method="post" action="/Account/Register" class="auth-form">
+        <form method="post" action="/Account/Register" class="auth-form" id="registerForm">
             <div class="form-group">
                 <label for="username">Tên đăng nhập *</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username" required 
+                       pattern="^[a-zA-Z0-9_]{4,20}$" 
+                       title="Tên đăng nhập chỉ chứa chữ cái, số, dấu gạch dưới và từ 4-20 ký tự.">
             </div>
 
             <div class="form-group">
@@ -29,17 +31,33 @@
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email">
+                <input type="email" id="email" name="email"
+                       pattern="@("^[a-zA-Z0-9._%+-]+@(gmail.com|yahoo.com|hotmail.com|outlook.com|icloud.com)$")"
+                       title="Vui lòng sử dụng email hợp lệ.">
+                <small style="color: #888; display: block; margin-top: 5px; font-size: 12px;">
+                    * Chỉ chấp nhận email từ: Gmail, Yahoo, Hotmail, Outlook, iCloud.
+                </small>
             </div>
 
             <div class="form-group">
                 <label for="phone">Số điện thoại</label>
-                <input type="tel" id="phone" name="phone">
+                <input type="tel" id="phone" name="phone"
+                       pattern="^(0|\+84)(3|5|7|8|9)([0-9]{8})$"
+                       title="Số điện thoại không hợp lệ (VD: 0912345678).">
             </div>
 
+            <!-- Địa chỉ 3 cấp -->
             <div class="form-group">
-                <label for="address">Địa chỉ</label>
-                <input type="text" id="address" name="address">
+                <label>Địa chỉ</label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <select id="province" class="form-control" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                        <option value="">Chọn Tỉnh/Thành phố</option>
+                    </select>
+                    <select id="district" class="form-control" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" disabled>
+                        <option value="">Chọn Quận/Huyện</option>
+                    </select>
+                </div>
+                <input type="text" id="addressDetail" name="address" placeholder="Số nhà, tên đường (VD: 123 Lê Lợi)" style="margin-top: 5px;">
             </div>
 
             <div class="form-group">
@@ -47,15 +65,23 @@
                 <div class="password-wrapper">
                     <input type="password" id="password" name="password" required minlength="6">
                     <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Hiện/ẩn mật khẩu">
-                        <svg class="eye-icon eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
+                        @Html.Raw(@"<svg class='eye-icon eye-open' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+                            <path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'></path>
+                            <circle cx='12' cy='12' r='3'></circle>
                         </svg>
-                        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                            <line x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
+                        <svg class='eye-icon eye-closed' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='display:none;'>
+                            <path d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'></path>
+                            <line x1='1' y1='1' x2='23' y2='23'></line>
+                        </svg>")
                     </button>
+                </div>
+                
+                <!-- KHỐI RÀNG BUỘC MẬT KHẨU -->
+                <div id="passwordRequirements" style="margin-top: 8px; font-size: 12px; color: #888; display: flex; flex-direction: column; gap: 3px;">
+                    <span id="req-length" style="transition: color 0.2s;">• Tối thiểu 6 ký tự</span>
+                    <span id="req-letter" style="transition: color 0.2s;">• Chứa ít nhất 1 chữ cái (a-z, A-Z)</span>
+                    <span id="req-number" style="transition: color 0.2s;">• Chứa ít nhất 1 chữ số (0-9)</span>
+                    <span id="req-special" style="transition: color 0.2s;">• Chứa ít nhất 1 ký tự đặc biệt (!#$%^&*)</span>
                 </div>
             </div>
 
@@ -64,19 +90,20 @@
                 <div class="password-wrapper">
                     <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
                     <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', this)" aria-label="Hiện/ẩn mật khẩu">
-                        <svg class="eye-icon eye-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
+                        @Html.Raw(@"<svg class='eye-icon eye-open' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+                            <path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'></path>
+                            <circle cx='12' cy='12' r='3'></circle>
                         </svg>
-                        <svg class="eye-icon eye-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                            <line x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
+                        <svg class='eye-icon eye-closed' viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' style='display:none;'>
+                            <path d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24'></path>
+                            <line x1='1' y1='1' x2='23' y2='23'></line>
+                        </svg>")
                     </button>
                 </div>
+                <small id="passwordMatchMessage" style="display: none; margin-top: 5px; font-size: 13px; font-weight: 600;"></small>
             </div>
 
-            <button type="submit" class="btn-auth-primary">Đăng ký</button>
+            <button type="submit" id="btnSubmit" class="btn-auth-primary" disabled style="opacity: 0.5; cursor: not-allowed;">Đăng ký</button>
         </form>
 
         <div class="auth-footer">
@@ -87,6 +114,7 @@
 
 @section Scripts {
     <script>
+        // 1. Hàm ẩn/hiện mật khẩu
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
             const eyeOpen = btn.querySelector('.eye-open');
@@ -102,5 +130,115 @@
                 eyeClosed.style.display = 'none';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // 2. Xử lý Địa chỉ 3 cấp
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+
+            fetch('https://provinces.open-api.vn/api/p/')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.code;
+                        option.textContent = province.name;
+                        provinceSelect.appendChild(option);
+                    });
+                });
+
+            provinceSelect.addEventListener('change', function () {
+                const provinceCode = this.value;
+                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                
+                if (!provinceCode) {
+                    districtSelect.disabled = true;
+                    return;
+                }
+
+                fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`)
+                    .then(response => response.json())
+                    .then(data => {
+                        districtSelect.disabled = false;
+                        data.districts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district.code;
+                            option.textContent = district.name;
+                            districtSelect.appendChild(option);
+                        });
+                    });
+            });
+
+            // 3. XỬ LÝ RÀNG BUỘC MẬT KHẨU VÀ NÚT ĐĂNG KÝ
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirmPassword');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const matchMessage = document.getElementById('passwordMatchMessage');
+
+            const reqLength = document.getElementById('req-length');
+            const reqLetter = document.getElementById('req-letter');
+            const reqNumber = document.getElementById('req-number');
+            const reqSpecial = document.getElementById('req-special');
+
+            // Hàm cập nhật màu sắc dấu tick
+            function updateReqUI(element, isValid) {
+                if (isValid) {
+                    element.style.color = '#28a745'; // Xanh
+                    element.textContent = '✓ ' + element.textContent.substring(2);
+                } else {
+                    element.style.color = '#888'; // Xám
+                    element.textContent = '• ' + element.textContent.substring(2);
+                }
+            }
+
+            // Hàm kiểm tra tổng thể
+            function checkFormValidity() {
+                const pass = passwordInput.value;
+                const confirmPass = confirmInput.value;
+
+                // 1. Kiểm tra các điều kiện mật khẩu
+                const hasLength = pass.length >= 6;
+                const hasLetter = /[a-zA-Z]/.test(pass);
+                const hasNumber = /[0-9]/.test(pass);
+                const hasSpecial = /[!#$%^&*(),.?":{}|<>]/.test(pass);
+
+                updateReqUI(reqLength, hasLength);
+                updateReqUI(reqLetter, hasLetter);
+                updateReqUI(reqNumber, hasNumber);
+                updateReqUI(reqSpecial, hasSpecial);
+
+                const isPasswordValid = hasLength && hasLetter && hasNumber && hasSpecial;
+
+                // 2. Kiểm tra khớp mật khẩu
+                let isMatch = false;
+                if (confirmPass.length === 0) {
+                    matchMessage.style.display = 'none';
+                } else if (pass === confirmPass) {
+                    matchMessage.style.display = 'block';
+                    matchMessage.textContent = 'Mật khẩu đã khớp!';
+                    matchMessage.style.color = '#28a745';
+                    isMatch = true;
+                } else {
+                    matchMessage.style.display = 'block';
+                    matchMessage.textContent = 'Mật khẩu chưa khớp!';
+                    matchMessage.style.color = '#dc3545';
+                }
+
+                // 3. Bật/tắt nút Đăng ký
+                if (isPasswordValid && isMatch) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.style.opacity = '1';
+                    btnSubmit.style.cursor = 'pointer';
+                } else {
+                    btnSubmit.disabled = true;
+                    btnSubmit.style.opacity = '0.5';
+                    btnSubmit.style.cursor = 'not-allowed';
+                }
+            }
+
+            // Gắn sự kiện
+            passwordInput.addEventListener('input', checkFormValidity);
+            confirmInput.addEventListener('input', checkFormValidity);
+        });
     </script>
 }

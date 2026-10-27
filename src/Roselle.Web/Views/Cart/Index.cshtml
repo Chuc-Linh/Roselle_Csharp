@@ -28,18 +28,20 @@
             <tbody>
                 @foreach (var item in Model.Items)
                 {
-                    <tr data-id="@item.CartItemID">
+                    var unitPrice = item.Product?.SellingPrice ?? 0m;
+                    var subTotal = unitPrice * item.Quantity;
+                    <tr data-product-id="@item.ProductID">
                         <td class="cart-product">
-                            <img src="@item.Product?.ImageUrl" alt="@item.Product?.ProductName" />
+                            <img src="@item.Product?.Image" alt="@item.Product?.ProductName" />
                             <span>@item.Product?.ProductName</span>
                         </td>
-                        <td class="cart-price">@item.UnitPrice.ToString("N0") ₫</td>
+                        <td class="cart-price">@unitPrice.ToString("N0") ₫</td>
                         <td class="cart-qty">
                             <button class="qty-btn qty-minus">−</button>
                             <input type="number" class="qty-input" value="@item.Quantity" min="1" />
                             <button class="qty-btn qty-plus">+</button>
                         </td>
-                        <td class="cart-subtotal">@item.SubTotal.ToString("N0") ₫</td>
+                        <td class="cart-subtotal">@subTotal.ToString("N0") ₫</td>
                         <td>
                             <button class="btn-remove" title="Xóa">✕</button>
                         </td>

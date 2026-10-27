@@ -17,11 +17,11 @@ else
     <section class="detail-page container">
         <div class="detail-grid">
             <div class="detail-image">
-                <img src="@Model.ImageUrl" alt="@Model.ProductName">
+                <img src="/@Model.Image" alt="@Model.ProductName">
             </div>
             <div class="detail-info">
                 <h1>@Model.ProductName</h1>
-                <div class="detail-price">@Model.Price.ToString("N0") ₫</div>
+                <div class="detail-price">@Model.SellingPrice.GetValueOrDefault().ToString("N0") ₫</div>
                 <p class="detail-desc">@Model.Description</p>
 
                 <div class="detail-qty">
