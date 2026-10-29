@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "QuanLyBanHoa.Desktop (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "QuanLyBanHoa.Desktop (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
