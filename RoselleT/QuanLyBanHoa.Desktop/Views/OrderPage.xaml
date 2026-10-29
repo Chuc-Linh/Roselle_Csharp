@@ -1,0 +1,208 @@
+<Page
+    x:Class="QuanLyBanHoa.Desktop.Views.OrderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QuanLyBanHoa.Desktop.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource QuicksandFont}"
+    RequestedTheme="Light">
+
+    <Grid Padding="28,24,28,28" RowSpacing="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- THANH CÔNG CỤ LỌC ĐƠN HÀNG (TỪ NGÀY - ĐẾN NGÀY - TRẠNG THÁI - PHƯỜNG/TP) -->
+        <Border Grid.Row="0" Background="White" CornerRadius="16" Padding="20,16" BorderBrush="#E5E9F0" BorderThickness="1">
+            <Grid ColumnSpacing="14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="155"/>
+                    <ColumnDefinition Width="155"/>
+                    <ColumnDefinition Width="170"/>
+                    <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Spacing="6">
+                    <TextBlock Text="Từ ngày" FontSize="12" FontWeight="Bold" Foreground="#475569"/>
+                    <CalendarDatePicker x:Name="DpFromDate"
+                                        PlaceholderText="dd/mm/yyyy"
+                                        HorizontalAlignment="Stretch"
+                                        Height="38"
+                                        CornerRadius="8"
+                                        DateChanged="DpFromDate_DateChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="Đến ngày" FontSize="12" FontWeight="Bold" Foreground="#475569"/>
+                    <CalendarDatePicker x:Name="DpToDate"
+                                        PlaceholderText="dd/mm/yyyy"
+                                        HorizontalAlignment="Stretch"
+                                        Height="38"
+                                        CornerRadius="8"
+                                        DateChanged="DpToDate_DateChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Spacing="6">
+                    <TextBlock Text="Trạng thái" FontSize="12" FontWeight="Bold" Foreground="#475569"/>
+                    <ComboBox x:Name="CmbFilterStatus"
+                              HorizontalAlignment="Stretch"
+                              Height="38"
+                              CornerRadius="8"
+                              SelectedIndex="0"
+                              SelectionChanged="CmbFilter_SelectionChanged">
+                        <ComboBoxItem Content="Tất cả đơn hàng" Tag="ALL"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="3" Spacing="6">
+                    <TextBlock Text="Phường, TP (Lọc &amp; Sắp xếp)" FontSize="12" FontWeight="Bold" Foreground="#475569"/>
+                    <ComboBox x:Name="CmbFilterWard"
+                              HorizontalAlignment="Stretch"
+                              Height="38"
+                              CornerRadius="8"
+                              SelectedIndex="0"
+                              SelectionChanged="CmbFilter_SelectionChanged">
+                        <ComboBoxItem Content="Tất cả (Sắp xếp Phường, TP)" Tag="ALL"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="4" Spacing="6">
+                    <TextBlock Text="Tìm kiếm nhanh" FontSize="12" FontWeight="Bold" Foreground="#475569"/>
+                    <TextBox x:Name="TxtSearch"
+                             PlaceholderText="Mã đơn, tên khách, (Phường, TP)..."
+                             Height="38"
+                             CornerRadius="8"
+                             TextChanged="TxtSearch_TextChanged"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="5" Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                    <Button x:Name="BtnFilter"
+                            Content="Lọc dữ liệu"
+                            FontWeight="Bold"
+                            Height="38"
+                            Padding="18,0"
+                            CornerRadius="8"
+                            Background="#1B2432"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Click="BtnFilter_Click"/>
+
+                    <Button x:Name="BtnResetFilter"
+                            Content="Làm mới"
+                            FontWeight="SemiBold"
+                            Height="38"
+                            Padding="14,0"
+                            CornerRadius="8"
+                            Background="#F1F5F9"
+                            Foreground="#1B2432"
+                            BorderThickness="0"
+                            Click="BtnResetFilter_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- BẢNG DANH SÁCH ĐƠN ĐẶT HÀNG -->
+        <Border Grid.Row="1" Background="White" CornerRadius="16" Padding="20" BorderBrush="#E5E9F0" BorderThickness="1">
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Tiêu đề cột -->
+                <Grid Grid.Row="0" Padding="14,12" Background="#F8FAFC" CornerRadius="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="95"/>
+                        <ColumnDefinition Width="115"/>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="130"/>
+                        <ColumnDefinition Width="175"/>
+                        <ColumnDefinition Width="130"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Mã đơn" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="0"/>
+                    <TextBlock Text="Ngày đặt" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="1"/>
+                    <TextBlock Text="Khách hàng" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="2"/>
+                    <TextBlock Text="Khu vực (Phường, TP)" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="3"/>
+                    <TextBlock Text="Tổng tiền" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="4"/>
+                    <TextBlock Text="Trạng thái" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="5" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Chi tiết" FontSize="12" FontWeight="Bold" Foreground="#475569" Grid.Column="6" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Danh sách đơn hàng -->
+                <ListView x:Name="OrderListView" Grid.Row="1" SelectionMode="None">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,0,4"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="14,10" BorderBrush="#F1F5F9" BorderThickness="0,0,0,1" Background="Transparent">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="95"/>
+                                    <ColumnDefinition Width="115"/>
+                                    <ColumnDefinition Width="160"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="130"/>
+                                    <ColumnDefinition Width="175"/>
+                                    <ColumnDefinition Width="130"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding OrderCode}" FontWeight="Bold" Foreground="#1B2432" Grid.Column="0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding OrderDateText}" Foreground="#334155" Grid.Column="1" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding CustomerName}" FontWeight="SemiBold" Foreground="#1B2432" Grid.Column="2" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
+                                <TextBlock Text="{Binding ShippingArea}" FontWeight="SemiBold" Foreground="#475569" Grid.Column="3" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" ToolTipService.ToolTip="{Binding FullAddress}"/>
+                                <TextBlock Text="{Binding TotalAmountText}" FontWeight="Bold" Foreground="{Binding AmountFg}" Grid.Column="4" VerticalAlignment="Center"/>
+
+                                <!-- ComboBox đổi trạng thái trực tiếp -->
+                                <ComboBox Grid.Column="5"
+                                          Width="155"
+                                          Height="34"
+                                          CornerRadius="6"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Tag="{Binding OrderID}"
+                                          ItemsSource="{Binding StatusOptions}"
+                                          SelectedItem="{Binding CurrentStatusDisplay}"
+                                          IsEnabled="{Binding CanChangeStatus}"
+                                          Foreground="{Binding StatusFg}"
+                                          FontWeight="Bold"
+                                          SelectionChanged="CmbRowStatus_SelectionChanged"/>
+
+                                <!-- Nút Xem chi tiết -->
+                                <Button Grid.Column="6"
+                                        Tag="{Binding OrderID}"
+                                        Click="BtnViewDetail_Click"
+                                        Height="32"
+                                        Padding="12,0"
+                                        CornerRadius="6"
+                                        Background="#EEF2FF"
+                                        Foreground="#1B2432"
+                                        BorderThickness="0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE890;" FontSize="13" Foreground="#1B2432"/>
+                                        <TextBlock Text="Xem chi tiết" FontSize="12" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- Thông báo trạng thái dưới cùng -->
+                <TextBlock x:Name="TxtStatusMessage" Grid.Row="2" FontSize="13" FontWeight="SemiBold" Visibility="Collapsed"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

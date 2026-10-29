@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="QuanLyBanHoa.Desktop.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:QuanLyBanHoa.Desktop">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <!-- Other merged dictionaries here -->
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Khai báo Font Quicksand dùng chung cho toàn bộ ứng dụng -->
+            <!-- Lưu ý: Đường dẫn đến thư mục Fonts kết hợp với #Quicksand -->
+            <FontFamily x:Key="QuicksandFont">ms-appx:///Fonts/Quicksand.ttf#Quicksand</FontFamily>
+            <FontFamily x:Key="ContentControlThemeFontFamily">ms-appx:///Fonts/Quicksand-Regular.ttf#Quicksand</FontFamily>
+
+            <!-- Áp dụng mặc định cho TextBlock -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource QuicksandFont}"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
