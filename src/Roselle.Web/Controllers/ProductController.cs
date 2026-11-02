@@ -101,19 +101,21 @@ namespace Roselle.Web.Controllers
             return d[n, m];
         }
 
-        // Action Tìm kiếm chính (Đã nâng cấp Tìm kiếm mờ)
-        public async Task<IActionResult> Search(string q)
+        // Action Tìm kiếm chính (Đã nâng cấp Tìm kiếm mờ + Lọc giá)
+        public async Task<IActionResult> Search(string q, decimal? minPrice = null, decimal? maxPrice = null)
         {
             ViewData["Title"] = "Tìm kiếm: " + q;
             ViewData["Query"] = q;
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = maxPrice;
 
-            if (string.IsNullOrWhiteSpace(q))
+            if (string.IsNullOrWhiteSpace(q) && minPrice == null && maxPrice == null)
             {
                 return View("Search", new List<Product>());
             }
 
             var allProducts = await _db.Products.ToListAsync();
-            var searchNormalized = StringHelper.RemoveDiacritics(q).Trim();
+            var searchNormalized = StringHelper.RemoveDiacritics(q ?? "").Trim();
             var categoryNames = new Dictionary<int, string> { { 1, "hoa cam tu" }, { 2, "hoa tulip" }, { 3, "hoa hong" }, { 4, "hoa huong duong" }, { 5, "hoa baby" } };
 
             var products = allProducts.Where(p => 
@@ -122,9 +124,17 @@ namespace Roselle.Web.Controllers
                 var desc = StringHelper.RemoveDiacritics(p.Description ?? "");
                 string catName = categoryNames.ContainsKey(p.ProductTypeID) ? categoryNames[p.ProductTypeID] : "";
 
+                // Nếu không có từ khóa, chỉ cần check giá (bỏ qua check tên)
+                if (string.IsNullOrWhiteSpace(searchNormalized))
+                {
+                    return true;
+                }
+
+                // 1. Khớp chính xác (Contains) - Hỗ trợ cả từ khóa ngắn như "bo", "hop"
                 if (name.Contains(searchNormalized) || desc.Contains(searchNormalized) || catName.Contains(searchNormalized)) 
                     return true;
 
+                // 2. Fuzzy Search (Chấp nhận sai chính tả) cho từ khóa dài
                 int tolerance = searchNormalized.Length > 5 ? 2 : (searchNormalized.Length > 3 ? 1 : 0);
                 
                 if (tolerance > 0)
@@ -141,6 +151,16 @@ namespace Roselle.Web.Controllers
 
                 return false;
             }).ToList();
+
+            // Lọc theo giá
+            if (minPrice.HasValue)
+            {
+                products = products.Where(p => (p.SellingPrice ?? 0) >= minPrice.Value).ToList();
+            }
+            if (maxPrice.HasValue)
+            {
+                products = products.Where(p => (p.SellingPrice ?? 0) <= maxPrice.Value).ToList();
+            }
 
             return View("Search", products);
         }

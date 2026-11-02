@@ -47,8 +47,8 @@
 
         /* Sửa riêng ô tìm kiếm trên Header để không bị đen xì */
         [data-theme="dark"] .header-search-group input {
-            background-color: transparent !important; /* Xóa nền đen */
-            color: #e0e0e0 !important; /* Chữ màu trắng xám */
+            background-color: transparent !important;
+            color: #e0e0e0 !important;
         }
         
         /* Đổi màu khung bao quanh tìm kiếm thành màu xám tối */
@@ -66,7 +66,8 @@
         [data-theme="dark"] .cart-table,
         [data-theme="dark"] .product-card,
         [data-theme="dark"] .checkout-page > div > div,
-        [data-theme="dark"] #searchDropdown { /* Thêm dropdown tìm kiếm */
+        [data-theme="dark"] #searchDropdown,
+        [data-theme="dark"] #priceFilterBox { /* Thêm dropdown tìm kiếm & lọc giá */
             background-color: #1e1e1e !important;
             color: #e0e0e0 !important;
             border-color: #333 !important;
@@ -76,6 +77,46 @@
         [data-theme="dark"] .cart-table th,
         [data-theme="dark"] .cart-table td {
             border-color: #333 !important;
+        }
+
+        /* === CSS CHO NÚT VÀ HỘP LỌC GIÁ === */
+        .price-filter-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 50px; /* Bo tròn hoàn toàn */
+            cursor: pointer;
+            font-size: 14px;
+            font-family: 'Quicksand', sans-serif; /* Đồng bộ font chữ */
+            font-weight: 600;
+            color: #333;
+            text-transform: uppercase; /* Viết hoa giống danh mục */
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .price-filter-btn:hover {
+            background-color: #f9f9f9;
+            border-color: #9d4edd;
+            color: #9d4edd;
+        }
+        
+        [data-theme="dark"] .price-filter-btn {
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .price-filter-btn:hover {
+            background-color: #2a2a2a;
+            border-color: #9d4edd;
+            color: #9d4edd;
+        }
+        
+        [data-theme="dark"] #priceFilterBox label {
+            color: #bbb !important;
+        }
+        [data-theme="dark"] #priceFilterBox a {
+            background-color: #333 !important;
+            color: #e0e0e0 !important;
         }
     </style>
 
@@ -135,9 +176,11 @@
             </ul>
         </nav>
 
-        <!-- Thanh tìm kiếm nâng cao -->
-        <div class="header-search-wrapper" style="position: relative;">
-            <form asp-controller="Product" asp-action="Search" method="get" class="header-search-form" id="searchForm">
+        <!-- Thanh tìm kiếm nâng cao & Lọc giá -->
+        <div class="header-search-wrapper" style="position: relative; display: flex; align-items: center; gap: 15px;">
+            
+            <!-- Form Tìm kiếm -->
+            <form asp-controller="Product" asp-action="Search" method="get" class="header-search-form" id="searchForm" style="margin: 0;">
                 <div class="header-search-group">
                     <input type="text" id="searchInput" name="q" placeholder="Tìm hoa..." value="@Context.Request.Query["q"]" aria-label="Search" autocomplete="off">
                     <button type="submit" aria-label="Tìm kiếm">
@@ -147,9 +190,37 @@
                     </button>
                 </div>
             </form>
+
+            <!-- Nút mở bộ lọc giá -->
+            <button type="button" id="togglePriceFilter" class="price-filter-btn">
+                Lọc giá
+            </button>
+
+            <!-- Hộp thoại bộ lọc giá (Căn chỉnh lại vị trí) -->
+            <div id="priceFilterBox" style="display: none; position: absolute; top: 120%; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 1001; padding: 20px; width: 280px;">
+                <form method="get" action="/Product/Search" id="priceFilterForm">
+                    <input type="hidden" name="q" value="@Context.Request.Query["q"]" />
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-size: 13px; color: #555; display: block; margin-bottom: 8px; font-weight: 600;">Từ giá (VNĐ)</label>
+                        <!-- box-sizing: border-box để không bị tràn -->
+                        <input type="number" id="minPriceInput" name="minPrice" value="@Context.Request.Query["minPrice"]" placeholder="VD: 100000" min="0" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Quicksand', sans-serif;" />
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 13px; color: #555; display: block; margin-bottom: 8px; font-weight: 600;">Đến giá (VNĐ)</label>
+                        <input type="number" id="maxPriceInput" name="maxPrice" value="@Context.Request.Query["maxPrice"]" placeholder="VD: 500000" min="0" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Quicksand', sans-serif;" />
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" style="flex: 1; padding: 10px; background: #9d4edd; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Quicksand', sans-serif;">Áp dụng</button>
+                        <a href="/Product/Search?q=@Context.Request.Query["q"]" style="flex: 1; text-align: center; padding: 10px; background: #f0f0f5; color: #555; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; font-family: 'Quicksand', sans-serif;">Xóa lọc</a>
+                    </div>
+                </form>
+            </div>
             
-            <!-- Dropdown gợi ý và lịch sử (Đã bỏ background: #fff; để CSS xử lý) -->
-            <div id="searchDropdown" class="search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; max-height: 300px; overflow-y: auto; min-width: 250px;">
+            <!-- Dropdown gợi ý tìm kiếm -->
+            <div id="searchDropdown" class="search-dropdown" style="display: none; position: absolute; top: 120%; left: 0; right: 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; max-height: 300px; overflow-y: auto; min-width: 250px;">
                 <div id="searchSuggestions"></div>
                 <div id="searchHistorySection" style="border-top: 1px solid #eee; padding: 10px; display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -201,7 +272,7 @@
         document.getElementById('site-year').textContent = new Date().getFullYear();
     </script>
 
-    <!-- JS: Hamburger + Dark Mode + Search Suggest -->
+    <!-- JS: Hamburger + Dark Mode + Search Suggest + Price Filter -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // === 1. Hamburger menu ===
@@ -214,7 +285,6 @@
                     navMenu.classList.toggle('active');
                 });
 
-                // Đóng menu khi nhấn link
                 navMenu.querySelectorAll('a').forEach(link => {
                     link.addEventListener('click', function () {
                         hamburger.classList.remove('active');
@@ -228,12 +298,10 @@
             const toggle = document.getElementById('themeToggle');
             const icon = toggle ? toggle.querySelector('.theme-icon') : null;
 
-            // Load theme đã lưu
             const savedTheme = localStorage.getItem('theme') || 'light';
             html.setAttribute('data-theme', savedTheme);
             if (icon) icon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
 
-            // Toggle khi nhấn
             if (toggle) {
                 toggle.addEventListener('click', function () {
                     const current = html.getAttribute('data-theme');
@@ -243,7 +311,6 @@
                     localStorage.setItem('theme', next);
                     if (icon) icon.textContent = next === 'dark' ? '☀️' : '🌙';
 
-                    // Hiện toast
                     if (typeof showToast === 'function') {
                         showToast(
                             next === 'dark' ? 'Đã bật chế độ tối ' : 'Đã bật chế độ sáng ',
@@ -263,7 +330,6 @@
             const searchForm = document.getElementById('searchForm');
 
             if (searchInput && searchDropdown) {
-                // Lịch sử tìm kiếm
                 function getHistory() {
                     return JSON.parse(localStorage.getItem('searchHistory')) || [];
                 }
@@ -302,7 +368,6 @@
                     });
                 }
 
-                // Auto-complete
                 let debounceTimer;
                 searchInput.addEventListener('input', function() {
                     const query = this.value.trim();
@@ -346,14 +411,12 @@
                     }, 300);
                 });
 
-                // Ẩn dropdown khi click ra ngoài
                 document.addEventListener('click', function(e) {
                     if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
                         searchDropdown.style.display = 'none';
                     }
                 });
 
-                // Lưu lịch sử khi submit form
                 searchForm.addEventListener('submit', function(e) {
                     const query = searchInput.value.trim();
                     if (query === '') {
@@ -365,11 +428,46 @@
                     saveHistory(query);
                 });
                 
-                // Hiển thị lịch sử khi click vào ô input
                 searchInput.addEventListener('focus', function() {
                     if (this.value.trim() === '') {
                         renderHistory();
                         searchDropdown.style.display = 'block';
+                    }
+                });
+            }
+
+            // === 4. Xử lý Bộ lọc giá ===
+            const togglePriceFilter = document.getElementById('togglePriceFilter');
+            const priceFilterBox = document.getElementById('priceFilterBox');
+            const priceFilterForm = document.getElementById('priceFilterForm');
+            const minPriceInput = document.getElementById('minPriceInput');
+            const maxPriceInput = document.getElementById('maxPriceInput');
+
+            if (togglePriceFilter && priceFilterBox) {
+                togglePriceFilter.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    priceFilterBox.style.display = priceFilterBox.style.display === 'none' ? 'block' : 'none';
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!priceFilterBox.contains(e.target) && !togglePriceFilter.contains(e.target)) {
+                        priceFilterBox.style.display = 'none';
+                    }
+                });
+
+                priceFilterForm.addEventListener('submit', function(e) {
+                    const minVal = parseFloat(minPriceInput.value) || 0;
+                    const maxVal = parseFloat(maxPriceInput.value) || Infinity;
+
+                    if (minVal < 0) {
+                        e.preventDefault();
+                        alert('Giá tối thiểu không được âm!');
+                        return;
+                    }
+                    if (maxVal < minVal) {
+                        e.preventDefault();
+                        alert('Giá tối đa không được nhỏ hơn giá tối thiểu!');
+                        return;
                     }
                 });
             }

@@ -13,12 +13,34 @@ namespace Roselle.Web.Controllers
             _cartService = cartService;
         }
 
+        // Tạm thời lưu user trong static list — sau này thay bằng database/API
         private static readonly List<User> MockUsers = new()
         {
-            new User { UserID = 1, Username = "admin", PasswordHash = "admin123", FullName = "Quản trị viên", Email = "admin@roselle.example", Phone = "0123456789", Address = "123 Đường Hoa, Quận A, TP. HCM", Role = "Admin" },
-            new User { UserID = 2, Username = "khach", PasswordHash = "khach123", FullName = "Khách hàng Demo", Email = "khach@roselle.example", Phone = "0987654321", Address = "456 Đường Lá, Quận B, TP. HCM", Role = "Customer" }
+            new User
+            {
+                UserID = 1,
+                Username = "admin",
+                PasswordHash = "admin123",
+                FullName = "Quản trị viên",
+                Email = "admin@roselle.example",
+                Phone = "0123456789",
+                Address = "123 Đường Hoa, Quận A, TP. HCM",
+                Role = "Admin"
+            },
+            new User
+            {
+                UserID = 2,
+                Username = "khach",
+                PasswordHash = "khach123",
+                FullName = "Khách hàng Demo",
+                Email = "khach@roselle.example",
+                Phone = "0987654321",
+                Address = "456 Đường Lá, Quận B, TP. HCM",
+                Role = "Customer"
+            }
         };
 
+        // GET: /Account/Login
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -27,10 +49,12 @@ namespace Roselle.Web.Controllers
             return View();
         }
 
+        // POST: /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password, string? returnUrl = null)
         {
-            var user = MockUsers.FirstOrDefault(u => u.Username == username && u.PasswordHash == password && u.IsActive);
+            var user = MockUsers.FirstOrDefault(u =>
+                u.Username == username && u.PasswordHash == password && u.IsActive);
 
             if (user == null)
             {
@@ -39,7 +63,7 @@ namespace Roselle.Web.Controllers
                 return View();
             }
 
-            // 1. Lưu thông tin user vào Session
+            // Lưu session user
             HttpContext.Session.SetInt32("UserID", user.UserID);
             HttpContext.Session.SetString("UserName", user.FullName);
             HttpContext.Session.SetString("UserRole", user.Role);
@@ -48,11 +72,10 @@ namespace Roselle.Web.Controllers
             HttpContext.Session.SetString("UserPhone", user.Phone ?? "");
             HttpContext.Session.SetString("UserAddress", user.Address ?? "");
 
-            // 2. GỘP GIỎ HÀNG TẠM VÀO TÀI KHOẢN
-            // (Hàm này sẽ lấy giỏ từ Session "GuestCart", lưu vào DB theo user.UserID, và xóa Session "GuestCart")
+            // Gộp giỏ hàng tạm vào tài khoản (nếu có)
             await _cartService.MergeGuestCartToUserAsync(HttpContext.Session, user.UserID);
 
-            // 3. Chuyển hướng
+            // Redirect
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
@@ -61,6 +84,7 @@ namespace Roselle.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        // GET: /Account/Register
         [HttpGet]
         public IActionResult Register()
         {
@@ -68,25 +92,29 @@ namespace Roselle.Web.Controllers
             return View();
         }
 
+        // POST: /Account/Register
         [HttpPost]
-        public async Task<IActionResult> Register(string username, string password, string confirmPassword, string fullName, string email, string phone, string address)
+        public async Task<IActionResult> Register(string username, string password, string confirmPassword,
+            string fullName, string email, string phone, string address)
         {
-            // ... (phần validate giữ nguyên như cũ) ...
+            // 1. Kiểm tra dữ liệu rỗng
             if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(fullName))
             {
                 ViewData["Error"] = "Vui lòng nhập đầy đủ thông tin bắt buộc (*).";
                 return View();
             }
 
+            // 2. Kiểm tra mật khẩu khớp
             if (password != confirmPassword)
             {
                 ViewData["Error"] = "Mật khẩu xác nhận không khớp.";
                 return View();
             }
 
+            // 3. RÀNG BUỘC TRÙNG LẶP
             if (MockUsers.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
             {
-                ViewData["Error"] = "Tên đăng nhập này đã tồn tại.";
+                ViewData["Error"] = "Tên đăng nhập này đã tồn tại. Vui lòng chọn tên khác.";
                 return View();
             }
 
@@ -102,12 +130,12 @@ namespace Roselle.Web.Controllers
                 return View();
             }
 
-            // Tạo user mới
+            // 4. Tạo User mới
             var newUser = new User
             {
                 UserID = MockUsers.Any() ? MockUsers.Max(u => u.UserID) + 1 : 1,
                 Username = username,
-                PasswordHash = password,
+                PasswordHash = password, // Lưu ý: Thực tế phải mã hóa (Hash) mật khẩu
                 FullName = fullName,
                 Email = email,
                 Phone = phone,
@@ -115,9 +143,10 @@ namespace Roselle.Web.Controllers
                 Role = "Customer"
             };
 
+            // 5. THÊM VÀO DANH SÁCH (ĐÂY LÀ ĐIỂM LIÊN KẾT VỚI TRANG LOGIN)
             MockUsers.Add(newUser);
 
-            // 1. Lưu thông tin user mới vào Session
+            // 6. Tự động đăng nhập sau khi đăng ký
             HttpContext.Session.SetInt32("UserID", newUser.UserID);
             HttpContext.Session.SetString("UserName", newUser.FullName);
             HttpContext.Session.SetString("UserRole", newUser.Role);
@@ -126,7 +155,7 @@ namespace Roselle.Web.Controllers
             HttpContext.Session.SetString("UserPhone", newUser.Phone ?? "");
             HttpContext.Session.SetString("UserAddress", newUser.Address ?? "");
 
-            // 2. GỘP GIỎ HÀNG TẠM (nếu khách đã thêm hoa trước khi đăng ký)
+            // Gộp giỏ hàng tạm (nếu khách có thêm hoa trước khi đăng ký)
             await _cartService.MergeGuestCartToUserAsync(HttpContext.Session, newUser.UserID);
 
             return RedirectToAction("Index", "Home");
@@ -188,7 +217,6 @@ namespace Roselle.Web.Controllers
 
         public IActionResult Logout()
         {
-            // Chỉ xóa session user, KHÔNG xóa "GuestCart" (để nếu họ thêm hoa lúc chưa login thì vẫn còn)
             HttpContext.Session.Remove("UserID");
             HttpContext.Session.Remove("UserName");
             HttpContext.Session.Remove("UserRole");

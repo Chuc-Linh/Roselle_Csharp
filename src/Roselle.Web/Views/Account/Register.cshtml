@@ -81,7 +81,8 @@
                     <span id="req-length" style="transition: color 0.2s;">• Tối thiểu 6 ký tự</span>
                     <span id="req-letter" style="transition: color 0.2s;">• Chứa ít nhất 1 chữ cái (a-z, A-Z)</span>
                     <span id="req-number" style="transition: color 0.2s;">• Chứa ít nhất 1 chữ số (0-9)</span>
-                    <span id="req-special" style="transition: color 0.2s;">• Chứa ít nhất 1 ký tự đặc biệt (!#$%^&*)</span>
+                    <!-- Đã xóa ví dụ, chỉ để chung chung -->
+                    <span id="req-special" style="transition: color 0.2s;">• Chứa ít nhất 1 ký tự đặc biệt</span>
                 </div>
             </div>
 
@@ -114,7 +115,6 @@
 
 @section Scripts {
     <script>
-        // 1. Hàm ẩn/hiện mật khẩu
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
             const eyeOpen = btn.querySelector('.eye-open');
@@ -132,7 +132,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // 2. Xử lý Địa chỉ 3 cấp
+            // Xử lý Địa chỉ 3 cấp
             const provinceSelect = document.getElementById('province');
             const districtSelect = document.getElementById('district');
 
@@ -169,7 +169,7 @@
                     });
             });
 
-            // 3. XỬ LÝ RÀNG BUỘC MẬT KHẨU VÀ NÚT ĐĂNG KÝ
+            // XỬ LÝ RÀNG BUỘC MẬT KHẨU VÀ NÚT ĐĂNG KÝ
             const passwordInput = document.getElementById('password');
             const confirmInput = document.getElementById('confirmPassword');
             const btnSubmit = document.getElementById('btnSubmit');
@@ -180,27 +180,26 @@
             const reqNumber = document.getElementById('req-number');
             const reqSpecial = document.getElementById('req-special');
 
-            // Hàm cập nhật màu sắc dấu tick
             function updateReqUI(element, isValid) {
                 if (isValid) {
-                    element.style.color = '#28a745'; // Xanh
+                    element.style.color = '#28a745';
                     element.textContent = '✓ ' + element.textContent.substring(2);
                 } else {
-                    element.style.color = '#888'; // Xám
+                    element.style.color = '#888';
                     element.textContent = '• ' + element.textContent.substring(2);
                 }
             }
 
-            // Hàm kiểm tra tổng thể
             function checkFormValidity() {
                 const pass = passwordInput.value;
                 const confirmPass = confirmInput.value;
 
-                // 1. Kiểm tra các điều kiện mật khẩu
                 const hasLength = pass.length >= 6;
                 const hasLetter = /[a-zA-Z]/.test(pass);
                 const hasNumber = /[0-9]/.test(pass);
-                const hasSpecial = /[!#$%^&*(),.?":{}|<>]/.test(pass);
+                
+                // SỬA TẠI ĐÂY: Chấp nhận mọi ký tự không phải chữ và số
+                const hasSpecial = /[^a-zA-Z0-9]/.test(pass);
 
                 updateReqUI(reqLength, hasLength);
                 updateReqUI(reqLetter, hasLetter);
@@ -209,7 +208,6 @@
 
                 const isPasswordValid = hasLength && hasLetter && hasNumber && hasSpecial;
 
-                // 2. Kiểm tra khớp mật khẩu
                 let isMatch = false;
                 if (confirmPass.length === 0) {
                     matchMessage.style.display = 'none';
@@ -224,7 +222,6 @@
                     matchMessage.style.color = '#dc3545';
                 }
 
-                // 3. Bật/tắt nút Đăng ký
                 if (isPasswordValid && isMatch) {
                     btnSubmit.disabled = false;
                     btnSubmit.style.opacity = '1';
@@ -236,7 +233,6 @@
                 }
             }
 
-            // Gắn sự kiện
             passwordInput.addEventListener('input', checkFormValidity);
             confirmInput.addEventListener('input', checkFormValidity);
         });
